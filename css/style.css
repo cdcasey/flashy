@@ -1,4 +1,14 @@
 body {
-  padding: 0;
   margin: 0;
+  padding: 0;
+}
+
+.login-container {
+  margin-top: 100px;
+  /* max-width: 30%; */
+  width: 350px;
+}
+
+.login-container-inactive {
+  display: none;
 }
