@@ -24,14 +24,17 @@ fetch('https://api.quizlet.com/2.0/sets/415?client_id=TEaPfm5BsY', {
     firebase.initializeApp(config);
 
     const auth = firebase.auth();
-    const loginButton = document.getElementById('login');
+    let loginButton = document.getElementById('login');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+
     loginButton.addEventListener('click', (event) => {
         event.preventDefault();
-        const emailInput = getInputValue('email');
-        let passwordInput = getInputValue('password');
-        auth.signInWithEmailAndPassword(emailInput, passwordInput)
-        .catch((error) => console.log(error.message));
-        passwordInput = '';
+        auth.signInWithEmailAndPassword(emailInput.value, passwordInput.value)
+        .catch((error) => {
+            console.log(error.message)
+            passwordInput.value = '';
+        });
     })
     // auth.createUserWithEmailAndPassword(email, password);
     const logoutButton = document.getElementById('logout');
@@ -41,6 +44,7 @@ fetch('https://api.quizlet.com/2.0/sets/415?client_id=TEaPfm5BsY', {
 
     let loginContainer = document.getElementsByClassName('login-container')[0];
     auth.onAuthStateChanged(user => {
+        passwordInput.value = '';
         if (user) {
             loginContainer.classList.add('login-container-inactive');
         } else {
@@ -78,9 +82,6 @@ fetch('https://api.quizlet.com/2.0/sets/415?client_id=TEaPfm5BsY', {
         liToRemove.remove();
     });
 
-    function getInputValue(elementId) {
-        return document.getElementById(elementId).value;
-    }
 })();
 
 
