@@ -43,6 +43,18 @@ const dbControl = (function () {
             return database;
         },
 
+        getDBRef: function (path) {
+            return database.ref(path);
+        },
+
+        saveToDB: function (dbRef, data) {
+            return dbRef.set(data);
+        },
+
+        updateDB: function (dbRef, data) {
+            return dbRef.update(data);
+        },
+
         closeConnection: function () {
             database.goOffline();
         },
@@ -62,7 +74,8 @@ const uiControl = (function () {
         emailInput: document.getElementById('email'),
         passwordInput: document.getElementById('password'),
         deckContainer: document.getElementById('decks'),
-        quizContainer: document.getElementById('quiz'),
+        quizContainer: document.getElementById('quiz-container'),
+        qaBox: document.getElementById('qabox'),
         deckList: document.getElementById('deck-list'),
         cardList: document.getElementById('card-list'),
     }
@@ -107,6 +120,7 @@ const control = (function (db, ui) {
     const DOMelements = ui.getDomElements();
     const auth = db.getAuth();
     const database = db.getDB();
+    let cards = {};
 
     let setupEventListeners = function () {
 
@@ -122,23 +136,25 @@ const control = (function (db, ui) {
         DOMelements.deckList.addEventListener('click', (event) => {
             const deckId = event.target.id
             const currentUser = auth.currentUser.uid;
-            const userRef = database.ref('/' + currentUser);
+            const userRef = db.getDBRef('/' + currentUser);
             const clickedDeck = db.getDeckTemplate(deckId);
-            // console.log("DEBUG deck", clickedDeck);
 
-            // TODO: fixed this section
-            userRef.on('value', (snapshot) => {
-                if (snapshot.exists()) {
-                    return false;
-                } else {
+            userRef.once('value', (snapshot) => {
+                if (!snapshot.exists()) {
                     clickedDeck.then((snapshot) => {
-                        console.log('DEBUG', snapshot.val());
                         userRef.set({
                             [snapshot.key]: snapshot.val(),
                         })
                     })
                 }
+                startQuiz(currentUser, deckId);
             })
+        })
+
+        DOMelements.qaBox.addEventListener('click', (event) => {
+            answer = cards[event.target.dataset.cardid].answer;
+            event.target.innerText = answer;
+
         })
     }
 
@@ -183,12 +199,50 @@ const control = (function (db, ui) {
 
         //   });
     })
-
-    function startQuiz(userRef, deckId) {
-        console.log(userRef, deckId);
-        changeUiMode('quiz');
-    }
 */
+    function startQuiz(user, deck) {
+        ui.changeUiMode('quiz');
+        let deckRef = db.getDBRef(`/${user}/${deck}/cards`);
+        deckRef.once('value', (snapshot) => {
+            // let cards = [];
+            snapshot.forEach((card, i) => {
+                cards[card.key] = card.val();
+            });
+            askQuestions();
+            // console.log(snapshot.val()[0]);
+            // card = {0: snapshot.val()[0]};
+            // console.log(card[0]);
+            // card[0].new = 'old';
+            // cards[0].new = "hi"
+            // console.log(cards[0]);
+
+            // cards.forEach(card => {
+            //     card.timeAccessed = Date.now();
+            // });
+            // console.log(typeof(cards), cards);
+
+            // db.updateDB(deckRef, cards);
+            // let cardRef = db.getDBRef(`/${user}/${deck}/cards`);
+            // cards[0].difficulty = "freddie";
+            // console.log(db.updateDB(cardRef, card));
+            // console.log("Here are CARDS", cards);
+
+            // cards.forEach(card => {
+            //     card.id = 'hello';
+            //     askQuestion(card);
+            // });
+
+            // console.log("STUFF", snapshot.key, snapshot.val(), cards);
+        });
+    }
+
+    function askQuestions() {
+        console.log(cards);
+
+        DOMelements.qaBox.innerText = cards[0].question;
+        DOMelements.qaBox.dataset.cardid = 0;
+    }
+
     return {
         init: function () {
             console.log("init");
