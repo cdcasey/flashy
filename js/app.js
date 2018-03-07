@@ -162,13 +162,12 @@ const control = (function (db, ui) {
         })
 
         DOMelements.answerButtons.addEventListener('click', (event) => {
-            console.log(event.target.id, DOMelements.qaBox.dataset.cardid);
             updateCard(event.target.id, DOMelements.qaBox.dataset.cardid);
             if (counter === cards.length) {
                 ui.changeUiMode('decks');
                 counter = 0;
             } else {
-                askQuestion();
+                askQuestions();
             }
         })
 
@@ -182,10 +181,25 @@ const control = (function (db, ui) {
     function updateCard(difficulty, cardId) {
         // TODO: Make sure this is updateing the SRS properly by calling SRS methods.
         // Also, update  the whole deck instead of just one card.
-        const date = new Date();
-        const srsInstance = new SpacedRepetition(date, difficulty, srsConfig);
-        cards[cardId].date = srsInstance.date;
-        cards[cardId].state = srsInstance.state;
+        const cardDate = new Date(cards[cardId].date);
+        const cardState = cards[cardId].state;
+        const srsInstance = new SpacedRepetition(cardDate, cardState, srsConfig);
+        let newStatus;
+        switch (difficulty) {
+            case "hard":
+                newStatus = srsInstance.bad();
+                break;
+            case "medium":
+            newStatus = srsInstance.ok();
+                break;
+            case "easy":
+            newStatus = srsInstance.good();
+                break;
+            default:
+                break;
+        }
+        cards[cardId].date = newStatus.date;
+        cards[cardId].state = newStatus.state;
         console.log(cards[cardId]);
 
         // db.updateDB
@@ -229,25 +243,27 @@ const control = (function (db, ui) {
                 }
             });
 
+            // TODO: Remove this. It's only needed for debugging to make sure
+            // SRS is working
             let toAsk = cards.filter((card) => {
                 const cardDate = new Date(card.date);
                 if (cardDate.getTime() <= startTime.getTime()) { return card; }
             });
             console.log("toAsk", toAsk);
 
-            askQuestion(toAsk);
+            askQuestions();
         });
     }
 
-    function askQuestion(cardSet) {
+    function askQuestions() {
         card = cards[counter];
         cardDate = new Date(card.date);
         if (cardDate.getTime() <= startTime.getTime()) {
-                    DOMelements.qaBox.innerText = card.question;
-                    DOMelements.qaBox.dataset.cardid = counter;
+            DOMelements.qaBox.innerText = card.question;
+            DOMelements.qaBox.dataset.cardid = counter;
         } else {
             counter++;
-            askQuestion();
+            askQuestions();
         }
     }
 
@@ -261,5 +277,3 @@ const control = (function (db, ui) {
 })(dbControl, uiControl);
 
 control.init();
-
-
