@@ -124,6 +124,7 @@ const control = (function (db, ui) {
     const auth = db.getAuth();
     let currentUser = '';
     const database = db.getDB();
+    let deckId = '';
     let cards = {};
     const srsConfig = {
         'bad': '5 minutes',
@@ -142,11 +143,12 @@ const control = (function (db, ui) {
             // to the database.
             db.closeConnection();
             auth.signOut();
+            deckId = '';
             location.reload();
         })
 
         DOMelements.deckList.addEventListener('click', (event) => {
-            const deckId = event.target.id
+            deckId = event.target.id
             const userRef = db.getDBRef(`/${currentUser}`);
             const userDeckRef = db.getDBRef(`/${currentUser}/${deckId}`);
             const clickedDeck = db.getDeckTemplate(deckId);
@@ -182,15 +184,16 @@ const control = (function (db, ui) {
         db.authorize(DOMelements.emailInput.value, DOMelements.passwordInput.value, DOMelements.passwordInput);
     }
 
-    function updateCard(difficulty, cardid) {
+    function updateCard(difficulty, cardId) {
         const date = new Date();
         const srsInstance = new SpacedRepetition(date, difficulty, srsConfig);
-        cards[cardid].date = srsInstance.date;
-        cards[cardid].state = srsInstance.state;
-        console.log(cards[cardid]);
+        cards[cardId].date = srsInstance.date;
+        cards[cardId].state = srsInstance.state;
+        console.log(cards[cardId]);
 
         // db.updateDB
-        // let cardRef = db.getDBRef(`/${user}/${deck}/cards`);
+        let cardRef = db.getDBRef(`/${currentUser}/${deckId}/cards/${cardId}`);
+        db.updateDB(cardRef, cards[cardId]);
     }
 
     auth.onAuthStateChanged(user => {
