@@ -240,8 +240,7 @@ const control = (function (db, ui) {
         let deckRef = db.getDBRef(`/${user}/${deck}/cards`);
         deckRef.once('value', (snapshot) => {
             snapshot.forEach((card, i) => {
-                if (!card.hasOwnProperty('state')) {
-
+                if (!card.val().hasOwnProperty('state')) {
                     const last_shown = new Date();
                     cards[card.key] = card.val();
                     cards[card.key].state = 'new';
