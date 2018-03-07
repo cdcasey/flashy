@@ -23,7 +23,6 @@ const dbControl = (function () {
     firebase.initializeApp(config);
 
     let database = firebase.database();
-    let deckRef = database.ref().child('decks');
     const auth = firebase.auth();
 
     return {
@@ -60,7 +59,7 @@ const dbControl = (function () {
         },
 
         getDeckTemplate: function (deckId) {
-            return deckRef.child(deckId).once('value');;
+            return this.getDBRef('/decks').child(deckId).once('value');
         }
     }
 
@@ -76,8 +75,12 @@ const uiControl = (function () {
         deckContainer: document.getElementById('decks'),
         quizContainer: document.getElementById('quiz-container'),
         qaBox: document.getElementById('qabox'),
+        answerButtons: document.getElementById('answer-buttons'),
         deckList: document.getElementById('deck-list'),
         cardList: document.getElementById('card-list'),
+        hardButton: document.getElementById('hard'),
+        mediumButton: document.getElementById('medium'),
+        easyButton: document.getElementById('easy'),
     }
 
     return {
@@ -119,8 +122,16 @@ const uiControl = (function () {
 const control = (function (db, ui) {
     const DOMelements = ui.getDomElements();
     const auth = db.getAuth();
+    let currentUser = '';
     const database = db.getDB();
     let cards = {};
+    const srsConfig = {
+        'bad': '5 minutes',
+        'new': 300000, // in milliseconds (5 minutes)
+        'fresh': '1 day',
+        'average': '5 days',
+        'old': '14 days'
+    }
 
     let setupEventListeners = function () {
 
@@ -131,20 +142,22 @@ const control = (function (db, ui) {
             // to the database.
             db.closeConnection();
             auth.signOut();
+            location.reload();
         })
 
         DOMelements.deckList.addEventListener('click', (event) => {
             const deckId = event.target.id
-            const currentUser = auth.currentUser.uid;
-            const userRef = db.getDBRef('/' + currentUser);
+            const userRef = db.getDBRef(`/${currentUser}`);
+            const userDeckRef = db.getDBRef(`/${currentUser}/${deckId}`);
             const clickedDeck = db.getDeckTemplate(deckId);
 
-            userRef.once('value', (snapshot) => {
+            userDeckRef.once('value', (snapshot) => {
                 if (!snapshot.exists()) {
                     clickedDeck.then((snapshot) => {
-                        userRef.set({
-                            [snapshot.key]: snapshot.val(),
-                        })
+                        // userRef.update({
+                        //     [snapshot.key]: snapshot.val(),
+                        // })
+                        db.updateDB(userRef, { [snapshot.key]: snapshot.val(), })
                     })
                 }
                 startQuiz(currentUser, deckId);
@@ -154,8 +167,14 @@ const control = (function (db, ui) {
         DOMelements.qaBox.addEventListener('click', (event) => {
             answer = cards[event.target.dataset.cardid].answer;
             event.target.innerText = answer;
-
+            DOMelements.answerButtons.classList.remove('answer-buttons-inactive');
         })
+
+        DOMelements.answerButtons.addEventListener('click', (event) => {
+            console.log(event.target.id, DOMelements.qaBox.dataset.cardid);
+            updateCard(event.target.id, DOMelements.qaBox.dataset.cardid);
+        })
+
     }
 
     function login(event) {
@@ -163,21 +182,34 @@ const control = (function (db, ui) {
         db.authorize(DOMelements.emailInput.value, DOMelements.passwordInput.value, DOMelements.passwordInput);
     }
 
-    database.ref().child('decks').on('child_added', snapshot => {
-        const li = document.createElement('li');
-        li.innerText = snapshot.key;
-        li.id = snapshot.key;
-        DOMelements.deckList.appendChild(li);
-    });
+    function updateCard(difficulty, cardid) {
+        const date = new Date();
+        const srsInstance = new SpacedRepetition(date, difficulty, srsConfig);
+        cards[cardid].date = srsInstance.date;
+        cards[cardid].state = srsInstance.state;
+        console.log(cards[cardid]);
+
+        // db.updateDB
+        // let cardRef = db.getDBRef(`/${user}/${deck}/cards`);
+    }
 
     auth.onAuthStateChanged(user => {
         DOMelements.passwordInput.value = '';
         if (user) {
             ui.changeUiMode('decks');
+            currentUser = auth.currentUser.uid;
+            database.ref().child('decks').on('child_added', snapshot => {
+                const li = document.createElement('li');
+                li.innerText = snapshot.key;
+                li.id = snapshot.key;
+                DOMelements.deckList.appendChild(li);
+            });
             // loginContainer.classList.add('login-container-inactive');
             // deckContainer.classList.remove('decks-inactive');
         } else {
             ui.changeUiMode('login');
+            // location.reload();
+
             // loginContainer.classList.remove('login-container-inactive');
             // deckContainer.classList.add('decks-inactive');
         }
@@ -204,9 +236,16 @@ const control = (function (db, ui) {
         ui.changeUiMode('quiz');
         let deckRef = db.getDBRef(`/${user}/${deck}/cards`);
         deckRef.once('value', (snapshot) => {
-            // let cards = [];
             snapshot.forEach((card, i) => {
-                cards[card.key] = card.val();
+                if (!card.hasOwnProperty('state')) {
+
+                    const last_shown = new Date();
+                    cards[card.key] = card.val();
+                    cards[card.key].state = 'new';
+                    cards[card.key].date = last_shown;
+                } else {
+                    cards[card.key] = card.val();
+                }
             });
             askQuestions();
             // console.log(snapshot.val()[0]);

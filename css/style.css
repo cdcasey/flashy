@@ -9,6 +9,6 @@ body {
   width: 350px;
 }
 
-.login-container-inactive, .decks-inactive, .quiz-inactive, .logout-button-inactive {
+.login-container-inactive, .decks-inactive, .quiz-inactive, .logout-button-inactive, .answer-buttons-inactive {
   display: none;
 }

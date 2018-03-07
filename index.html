@@ -9,6 +9,8 @@
     crossorigin="anonymous">
   <link rel="stylesheet" href="css/style.css">
   <script src="https://www.gstatic.com/firebasejs/4.10.1/firebase.js"></script>
+  <script src="js/human-interval.js" defer></script>
+  <script src="js/spaced-repetition.js" defer></script>
   <script src="js/app.js" defer></script>
   <title>Flashy</title>
 </head>
@@ -37,9 +39,11 @@
     </div>
     <div id="quiz-container" class="container jumbotron quiz-inactive">
       <div id="qabox">this is the quiz</div>
-      <button id="hard" type="submit" class="btn btn-danger">That was hard</button>
-      <button id="medium" type="submit" class="btn btn-warning">I had to think about it for a bit</button>
-      <button id="easy" type="submit" class="btn btn-success">Too easy</button>
+      <div id="answer-buttons" class="answer-buttons-inactive">
+        <button id="hard" type="submit" class="btn btn-danger">That was hard</button>
+        <button id="medium" type="submit" class="btn btn-warning">I had to think about it for a bit</button>
+        <button id="easy" type="submit" class="btn btn-success">Too easy</button>
+      </div>
     </div>
   </div>
   <!-- <script>
