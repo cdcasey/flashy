@@ -241,9 +241,10 @@ const control = (function (db, ui) {
 
     function askQuestion(cardSet) {
         card = cards[counter];
+        cardDate = new Date(card.date);
         if (cardDate.getTime() <= startTime.getTime()) {
                     DOMelements.qaBox.innerText = card.question;
-                    DOMelements.qaBox.dataset.cardid = i;
+                    DOMelements.qaBox.dataset.cardid = counter;
         } else {
             counter++;
             askQuestion();
