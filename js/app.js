@@ -163,10 +163,11 @@ const control = (function (db, ui) {
 
         DOMelements.answerButtons.addEventListener('click', (event) => {
             updateCard(event.target.id, DOMelements.qaBox.dataset.cardid);
+            DOMelements.answerButtons.classList.add('answer-buttons-inactive');
             if (counter === cards.length) {
-                ui.changeUiMode('decks');
                 counter = 0;
             } else {
+                counter++;
                 askQuestions();
             }
         })
