@@ -1,16 +1,3 @@
-/*
-fetch('https://api.quizlet.com/2.0/sets/415?client_id=TEaPfm5BsY', {
-    mode: 'no-cors'
-})
-    .then((response) => {
-        return response
-    })
-    .then((data) => {
-        let terms = data.terms;
-        console.log(data);
-
-    })
-*/
 const dbControl = (function () {
     let config = {
         apiKey: "AIzaSyBiHh1j4ExmaGdaRCWuYov18mOAn58WYJw",
@@ -125,7 +112,9 @@ const control = (function (db, ui) {
     let currentUser = '';
     const database = db.getDB();
     let deckId = '';
-    let cards = {};
+    let cards = [];
+    let counter = 0;
+    const startTime = new Date();
     const srsConfig = {
         'bad': '5 minutes',
         'new': 300000, // in milliseconds (5 minutes)
@@ -175,6 +164,12 @@ const control = (function (db, ui) {
         DOMelements.answerButtons.addEventListener('click', (event) => {
             console.log(event.target.id, DOMelements.qaBox.dataset.cardid);
             updateCard(event.target.id, DOMelements.qaBox.dataset.cardid);
+            if (counter === cards.length) {
+                ui.changeUiMode('decks');
+                counter = 0;
+            } else {
+                askQuestion();
+            }
         })
 
     }
@@ -185,6 +180,8 @@ const control = (function (db, ui) {
     }
 
     function updateCard(difficulty, cardId) {
+        // TODO: Make sure this is updateing the SRS properly by calling SRS methods.
+        // Also, update  the whole deck instead of just one card.
         const date = new Date();
         const srsInstance = new SpacedRepetition(date, difficulty, srsConfig);
         cards[cardId].date = srsInstance.date;
@@ -218,70 +215,39 @@ const control = (function (db, ui) {
         }
     });
 
-    /*
-
-
-
-        startQuiz(userRef, deckId);
-        // database.ref('/decks/' + deckId).once('value').then(function(snapshot) {
-        //     // console.log(snapshot.val());
-        //     let cards = snapshot.val().cards;
-        //     cards.forEach(card => {
-        //         const li = document.createElement('li');
-        //         li.innerText = card.question;
-        //         cardList.appendChild(li);
-        //     });
-
-        //   });
-    })
-*/
     function startQuiz(user, deck) {
         ui.changeUiMode('quiz');
         let deckRef = db.getDBRef(`/${user}/${deck}/cards`);
         deckRef.once('value', (snapshot) => {
             snapshot.forEach((card, i) => {
                 if (!card.val().hasOwnProperty('state')) {
-                    const last_shown = new Date();
                     cards[card.key] = card.val();
                     cards[card.key].state = 'new';
-                    cards[card.key].date = last_shown;
+                    cards[card.key].date = startTime;
                 } else {
                     cards[card.key] = card.val();
                 }
             });
-            askQuestions();
-            // console.log(snapshot.val()[0]);
-            // card = {0: snapshot.val()[0]};
-            // console.log(card[0]);
-            // card[0].new = 'old';
-            // cards[0].new = "hi"
-            // console.log(cards[0]);
 
-            // cards.forEach(card => {
-            //     card.timeAccessed = Date.now();
-            // });
-            // console.log(typeof(cards), cards);
+            let toAsk = cards.filter((card) => {
+                const cardDate = new Date(card.date);
+                if (cardDate.getTime() <= startTime.getTime()) { return card; }
+            });
+            console.log("toAsk", toAsk);
 
-            // db.updateDB(deckRef, cards);
-            // let cardRef = db.getDBRef(`/${user}/${deck}/cards`);
-            // cards[0].difficulty = "freddie";
-            // console.log(db.updateDB(cardRef, card));
-            // console.log("Here are CARDS", cards);
-
-            // cards.forEach(card => {
-            //     card.id = 'hello';
-            //     askQuestion(card);
-            // });
-
-            // console.log("STUFF", snapshot.key, snapshot.val(), cards);
+            askQuestion(toAsk);
         });
     }
 
-    function askQuestions() {
-        console.log(cards);
-
-        DOMelements.qaBox.innerText = cards[0].question;
-        DOMelements.qaBox.dataset.cardid = 0;
+    function askQuestion(cardSet) {
+        card = cards[counter];
+        if (cardDate.getTime() <= startTime.getTime()) {
+                    DOMelements.qaBox.innerText = card.question;
+                    DOMelements.qaBox.dataset.cardid = i;
+        } else {
+            counter++;
+            askQuestion();
+        }
     }
 
     return {
@@ -296,43 +262,3 @@ const control = (function (db, ui) {
 control.init();
 
 
-// (function () {
-
-    // const deckRefList = deckRef.child('hobbie');
-
-
-    // auth.createUserWithEmailAndPassword(email, password);
-
-
-    // deckRef.on('value', snap => {
-    //     objectElement.innerText = JSON.stringify(snap.val(), null, 2);
-    // });
-
-
-
-
-
-    // deckRefList.on('child_changed', snap => {
-    //     const liChanged = document.getElementById(snap.key);
-    //     liChanged.innerText = snap.val();
-    // });
-
-    // deckRefList.on('child_removed', snap => {
-    //     const liToRemove = document.getElementById(snap.key);
-    //     liToRemove.remove();
-    // });
-
-// })();
-
-
-/*
-function writeUserData(userId, name, email, imageUrl) {
-    firebase.database().ref('test/' + userId).set({
-      username: name,
-      email: email,
-      profile_picture : imageUrl
-    });
-  }
-
-writeUserData('cdc', 'chris', 'jim@jim', '/path/to/image');
-*/
