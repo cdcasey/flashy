@@ -88,6 +88,7 @@ const uiControl = (function () {
                     DOMelements.loginContainer.classList.add('login-container-inactive');
                     DOMelements.deckContainer.classList.remove('decks-inactive');
                     DOMelements.quizContainer.classList.add('quiz-inactive');
+                    DOMelements.answerButtons.classList.add('answer-buttons-inactive');
                     break;
 
                 case 'quiz':
@@ -131,24 +132,7 @@ const control = (function (db, ui) {
 
         DOMelements.logoutButton.addEventListener('click', logout);
 
-        DOMelements.deckList.addEventListener('click', (event) => {
-            deckId = event.target.id
-            const userRef = db.getDBRef(`/${currentUser}`);
-            const userDeckRef = db.getDBRef(`/${currentUser}/${deckId}`);
-            const clickedDeck = db.getDeckTemplate(deckId);
-
-            userDeckRef.once('value', (snapshot) => {
-                if (!snapshot.exists()) {
-                    clickedDeck.then((snapshot) => {
-                        // userRef.update({
-                        //     [snapshot.key]: snapshot.val(),
-                        // })
-                        db.updateDB(userRef, { [snapshot.key]: snapshot.val(), })
-                    })
-                }
-                startQuiz(currentUser, deckId);
-            })
-        })
+        DOMelements.deckList.addEventListener('click', startQuiz);
 
         DOMelements.qaBox.addEventListener('click', (event) => {
             answer = cards[event.target.dataset.cardid].answer;
@@ -212,30 +196,47 @@ const control = (function (db, ui) {
         }
     });
 
-    function startQuiz(user, deck) {
-        ui.changeUiMode('quiz');
-        let deckRef = db.getDBRef(`/${user}/${deck}/cards`);
-        deckRef.once('value', (snapshot) => {
-            snapshot.forEach((card, i) => {
-                if (!card.val().hasOwnProperty('state')) {
-                    cards[card.key] = card.val();
-                    cards[card.key].state = 'new';
-                    cards[card.key].date = startTime;
-                } else {
-                    cards[card.key] = card.val();
-                }
-            });
+    function startQuiz(event, user, deck) {
+        deckId = event.target.id
+        const userRef = db.getDBRef(`/${currentUser}`);
+        const userDeckRef = db.getDBRef(`/${currentUser}/${deckId}`);
+        const clickedDeck = db.getDeckTemplate(deckId);
 
-            // TODO: Remove this. It's only needed for debugging to make sure
-            // SRS is working
-            let toAsk = cards.filter((card) => {
-                const cardDate = new Date(card.date);
-                if (cardDate.getTime() <= startTime.getTime()) { return card; }
-            });
-            // console.log("toAsk", toAsk);
+        userDeckRef.once('value', (snapshot) => {
+            if (!snapshot.exists()) {
+                clickedDeck.then((snapshot) => {
+                    // userRef.update({
+                    //     [snapshot.key]: snapshot.val(),
+                    // })
+                    db.updateDB(userRef, { [snapshot.key]: snapshot.val(), })
+                })
+            }
+            // startQuiz(currentUser, deckId);
+        }).then(() => {
+            ui.changeUiMode('quiz');
+            let deckRef = db.getDBRef(`/${currentUser}/${deckId}/cards`);
+            deckRef.once('value', (snapshot) => {
+                snapshot.forEach((card, i) => {
+                    if (!card.val().hasOwnProperty('state')) {
+                        cards[card.key] = card.val();
+                        cards[card.key].state = 'new';
+                        cards[card.key].date = startTime;
+                    } else {
+                        cards[card.key] = card.val();
+                    }
+                });
 
-            askQuestions();
-        });
+                // TODO: Remove this. It's only needed for debugging to make sure
+                // SRS is working
+                let toAsk = cards.filter((card) => {
+                    const cardDate = new Date(card.date);
+                    if (cardDate.getTime() <= startTime.getTime()) { return card; }
+                });
+                // console.log("cards", cards);
+                // console.log("toAsk", toAsk);
+                askQuestions();
+            })
+        })
     }
 
     function askQuestions() {
