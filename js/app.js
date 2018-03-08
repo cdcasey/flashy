@@ -220,6 +220,10 @@ const control = (function (db, ui) {
                 const li = document.createElement('li');
                 li.innerText = snapshot.key;
                 li.id = snapshot.key;
+                let mostRecentListItem = DOMelements.deckList.lastChild;
+                if (mostRecentListItem && !mostRecentListItem.classList.contains('alt')) {
+                    li.classList.add('alt');
+                }
                 DOMelements.deckList.appendChild(li);
             });
             // loginContainer.classList.add('login-container-inactive');
