@@ -138,11 +138,7 @@ const control = (function (db, ui) {
 
         DOMelements.answerButtons.addEventListener('click', processAnswer);
 
-        DOMelements.decksLink.addEventListener('click', (event) => {
-            ui.changeUiMode('decks');
-            counter = 0;
-            cards = [];
-        })
+        DOMelements.decksLink.addEventListener('click', listDecks);
 
     }
 
@@ -152,12 +148,18 @@ const control = (function (db, ui) {
         db.authorize(DOMelements.emailInput.value, DOMelements.passwordInput.value, DOMelements.passwordInput);
     }
 
+    function listDecks() {
+        ui.changeUiMode('decks');
+        counter = 0;
+        cards = [];
+    }
+
     // Part of login. Syncs the deck list in the database with the UI
     auth.onAuthStateChanged(user => {
         DOMelements.passwordInput.value = '';
         if (user) {
             DOMelements.userIdDisplay.innerText = user.displayName || user.email;
-            ui.changeUiMode('decks');
+            listDecks();
             currentUser = auth.currentUser.uid;
             database.ref().child('decks').on('child_added', snapshot => {
                 const li = document.createElement('li');
