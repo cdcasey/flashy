@@ -52,8 +52,8 @@ li.alt {
 }
 
 li:hover {
-  /* background-color: lightsteelblue; */
-  background-color: white;
+  background-color: #d1d8e2;
+  /* background-color: white; */
 }
 
 .navbar-inactive,
