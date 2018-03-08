@@ -234,7 +234,7 @@ const control = (function (db, ui) {
         } else if (counter === cards.length - 1) {
             counter = 0;
             DOMelements.qaBox.innerText = "Congrats! No cards to study right now!";
-            setTimeout(DOMelements.decksLink.click, 2000);
+            // setTimeout(DOMelements.decksLink.click, 2000);
         } else {
             counter++;
             askQuestions();
@@ -253,7 +253,7 @@ const control = (function (db, ui) {
         if (counter === cards.length - 1) {
             counter = 0;
             // TODO: This is in the wrong place
-            ui.changeUiMode('quiz');
+            DOMelements.qaBox.innerText = "Congrats! No cards to study right now!";
         } else {
             counter++;
             askQuestions();
