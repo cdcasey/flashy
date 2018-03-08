@@ -129,14 +129,7 @@ const control = (function (db, ui) {
 
         DOMelements.loginButton.addEventListener('click', login);
 
-        DOMelements.logoutButton.addEventListener('click', (event) => {
-            // Without this call, simply logging out does not release the socket
-            // to the database.
-            db.closeConnection();
-            auth.signOut();
-            deckId = '';
-            location.reload();
-        })
+        DOMelements.logoutButton.addEventListener('click', logout);
 
         DOMelements.deckList.addEventListener('click', (event) => {
             deckId = event.target.id
@@ -286,6 +279,16 @@ const control = (function (db, ui) {
 
         let cardRef = db.getDBRef(`/${currentUser}/${deckId}/cards/${cardId}`);
         db.updateDB(cardRef, cards[cardId]);
+    }
+
+    // logout
+    function logout(event) {
+        // Without this call, simply logging out does not release the socket
+        // to the database.
+        db.closeConnection();
+        auth.signOut();
+        deckId = '';
+        location.reload();
     }
 
     return {
