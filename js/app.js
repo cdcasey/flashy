@@ -185,38 +185,13 @@ const control = (function (db, ui) {
 
     }
 
+    // login
     function login(event) {
         event.preventDefault();
         db.authorize(DOMelements.emailInput.value, DOMelements.passwordInput.value, DOMelements.passwordInput);
     }
 
-    function updateCard(difficulty, cardId) {
-        // TODO: Make sure this is updateing the SRS properly by calling SRS methods.
-        // Also, update  the whole deck instead of just one card.
-        const cardDate = new Date(cards[cardId].date);
-        const cardState = cards[cardId].state;
-        const srsInstance = new SpacedRepetition(cardDate, cardState, srsConfig);
-        let newStatus;
-        switch (difficulty) {
-            case "hard":
-                newStatus = srsInstance.bad();
-                break;
-            case "medium":
-                newStatus = srsInstance.ok();
-                break;
-            case "easy":
-                newStatus = srsInstance.good();
-                break;
-            default:
-                break;
-        }
-        cards[cardId].date = newStatus.date;
-        cards[cardId].state = newStatus.state;
-
-        let cardRef = db.getDBRef(`/${currentUser}/${deckId}/cards/${cardId}`);
-        db.updateDB(cardRef, cards[cardId]);
-    }
-
+    // Part of login. Syncs the deck list in the database with the UI
     auth.onAuthStateChanged(user => {
         DOMelements.passwordInput.value = '';
         if (user) {
@@ -284,6 +259,33 @@ const control = (function (db, ui) {
             counter++;
             askQuestions();
         }
+    }
+
+    function updateCard(difficulty, cardId) {
+        // TODO: Make sure this is updateing the SRS properly by calling SRS methods.
+        // Also, update  the whole deck instead of just one card.
+        const cardDate = new Date(cards[cardId].date);
+        const cardState = cards[cardId].state;
+        const srsInstance = new SpacedRepetition(cardDate, cardState, srsConfig);
+        let newStatus;
+        switch (difficulty) {
+            case "hard":
+                newStatus = srsInstance.bad();
+                break;
+            case "medium":
+                newStatus = srsInstance.ok();
+                break;
+            case "easy":
+                newStatus = srsInstance.good();
+                break;
+            default:
+                break;
+        }
+        cards[cardId].date = newStatus.date;
+        cards[cardId].state = newStatus.state;
+
+        let cardRef = db.getDBRef(`/${currentUser}/${deckId}/cards/${cardId}`);
+        db.updateDB(cardRef, cards[cardId]);
     }
 
     return {
