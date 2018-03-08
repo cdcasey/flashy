@@ -162,10 +162,13 @@ const control = (function (db, ui) {
         })
 
         DOMelements.answerButtons.addEventListener('click', (event) => {
+            // TODO: end the quiz if it's at the end
             updateCard(event.target.id, DOMelements.qaBox.dataset.cardid);
             DOMelements.answerButtons.classList.add('answer-buttons-inactive');
-            if (counter === cards.length) {
+            if (counter === cards.length - 1) {
                 counter = 0;
+                // TODO: This is in the wrong place
+                ui.changeUiMode('quiz');
             } else {
                 counter++;
                 askQuestions();
