@@ -54,6 +54,9 @@ const dbControl = (function () {
 
 const uiControl = (function () {
     const DOMelements = {
+        navBar: document.getElementsByClassName('navbar')[0],
+        userIdDisplay: document.getElementById('userid'),
+        decksLink: document.getElementById('decks-link'),
         loginContainer: document.getElementsByClassName('login-container')[0],
         loginButton: document.getElementById('login'),
         logoutButton: document.getElementById('logout'),
@@ -74,6 +77,7 @@ const uiControl = (function () {
         changeUiMode: function (mode) {
             switch (mode) {
                 case 'login':
+                    DOMelements.navBar.classList.add('navbar-inactive');
                     DOMelements.loginContainer.classList.remove('login-container-inactive');
                     DOMelements.deckContainer.classList.add('decks-inactive');
                     DOMelements.quizContainer.classList.add('quiz-inactive');
@@ -81,6 +85,7 @@ const uiControl = (function () {
                     break;
 
                 case 'decks':
+                    DOMelements.navBar.classList.remove('navbar-inactive');
                     DOMelements.loginContainer.classList.add('login-container-inactive');
                     DOMelements.deckContainer.classList.remove('decks-inactive');
                     DOMelements.quizContainer.classList.add('quiz-inactive');
@@ -175,6 +180,12 @@ const control = (function (db, ui) {
             }
         })
 
+        DOMelements.decksLink.addEventListener('click', (event) => {
+            ui.changeUiMode('decks');
+            counter = 0;
+            cards = [];
+        })
+
     }
 
     function login(event) {
@@ -214,6 +225,9 @@ const control = (function (db, ui) {
     auth.onAuthStateChanged(user => {
         DOMelements.passwordInput.value = '';
         if (user) {
+            console.log(user);
+
+            DOMelements.userIdDisplay.innerText = user.displayName || user.email;
             ui.changeUiMode('decks');
             currentUser = auth.currentUser.uid;
             database.ref().child('decks').on('child_added', snapshot => {

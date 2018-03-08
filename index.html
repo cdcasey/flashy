@@ -16,6 +16,24 @@
 </head>
 
 <body>
+
+  <nav class="navbar navbar-expand-lg navbar-light bg-light navbar-inactive">
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+      <ul class="navbar-nav mr-auto">
+        <li id="userid" class="navbar-brand">
+        </li>
+        <li id="decks-link" class="nav-item active">
+          <a class="nav-link" href="#">Back to Decks
+            <span class="sr-only">Back to deck list</span>
+          </a>
+        </li>
+      </ul>
+      <form class="form-inline my-2 my-lg-0">
+        <button id="logout" type="submit" class="btn btn-outline-primary logout-button-inactive">Logout</button>
+      </form>
+    </div>
+  </nav>
+
   <div class="container jumbotron login-container">
     <form class="login-form">
       <div class="form-group">
@@ -32,7 +50,6 @@
   </div>
 
   <div>
-    <button id="logout" type="submit" class="btn btn-primary logout-button-inactive">Logout</button>
     <div id="decks" class="container jumbotron decks-inactive">
       <ul id="deck-list"></ul>
       <ul id="card-list"></ul>
