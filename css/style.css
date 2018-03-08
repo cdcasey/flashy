@@ -1,14 +1,51 @@
 body {
   margin: 0;
   padding: 0;
+  background-color: whitesmoke;
 }
 
-.login-container {
+.login-container,
+#decks {
   margin-top: 100px;
   /* max-width: 30%; */
   width: 350px;
 }
 
-.login-container-inactive, .decks-inactive, .quiz-inactive, .logout-button-inactive, .answer-buttons-inactive {
+.login-container-inactive,
+.decks-inactive,
+.quiz-inactive,
+.logout-button-inactive {
   display: none;
+}
+
+.answer-buttons-inactive {
+  visibility: hidden;
+}
+
+#answer-buttons {
+  text-align: center;
+  padding: 10px;
+}
+
+#answer-buttons > button {
+  margin: 0 10px;
+}
+
+#quiz-container {
+  padding: 20px;
+  width: 600px;
+}
+
+#qabox {
+  border: 1px solid #E5E5E5;
+  /* display: table-cell; */
+  /* width: 10px; */
+  /* height: 10px; */
+  background-color: #F8F9F9;
+  padding: 5rem;
+  /* margin: ; */
+  font-size: 20px;
+  text-align: center;
+  font-family: sans-serif;
+  border-radius: 5px;
 }
