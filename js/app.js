@@ -134,11 +134,7 @@ const control = (function (db, ui) {
 
         DOMelements.deckList.addEventListener('click', startQuiz);
 
-        DOMelements.qaBox.addEventListener('click', (event) => {
-            answer = cards[event.target.dataset.cardid].answer;
-            event.target.innerText = answer;
-            DOMelements.answerButtons.classList.remove('answer-buttons-inactive');
-        })
+        DOMelements.qaBox.addEventListener('click', flipCard);
 
         DOMelements.answerButtons.addEventListener('click', (event) => {
             // TODO: end the quiz if it's at the end
@@ -253,6 +249,12 @@ const control = (function (db, ui) {
             counter++;
             askQuestions();
         }
+    }
+
+    function flipCard(event) {
+        answer = cards[event.target.dataset.cardid].answer;
+        event.target.innerText = answer;
+        DOMelements.answerButtons.classList.remove('answer-buttons-inactive');
     }
 
     function updateCard(difficulty, cardId) {
