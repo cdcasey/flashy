@@ -205,19 +205,17 @@ const control = (function (db, ui) {
                 newStatus = srsInstance.bad();
                 break;
             case "medium":
-            newStatus = srsInstance.ok();
+                newStatus = srsInstance.ok();
                 break;
             case "easy":
-            newStatus = srsInstance.good();
+                newStatus = srsInstance.good();
                 break;
             default:
                 break;
         }
         cards[cardId].date = newStatus.date;
         cards[cardId].state = newStatus.state;
-        console.log(cards[cardId]);
 
-        // db.updateDB
         let cardRef = db.getDBRef(`/${currentUser}/${deckId}/cards/${cardId}`);
         db.updateDB(cardRef, cards[cardId]);
     }
@@ -225,8 +223,6 @@ const control = (function (db, ui) {
     auth.onAuthStateChanged(user => {
         DOMelements.passwordInput.value = '';
         if (user) {
-            console.log(user);
-
             DOMelements.userIdDisplay.innerText = user.displayName || user.email;
             ui.changeUiMode('decks');
             currentUser = auth.currentUser.uid;
@@ -271,7 +267,7 @@ const control = (function (db, ui) {
                 const cardDate = new Date(card.date);
                 if (cardDate.getTime() <= startTime.getTime()) { return card; }
             });
-            console.log("toAsk", toAsk);
+            // console.log("toAsk", toAsk);
 
             askQuestions();
         });
@@ -283,6 +279,10 @@ const control = (function (db, ui) {
         if (cardDate.getTime() <= startTime.getTime()) {
             DOMelements.qaBox.innerText = card.question;
             DOMelements.qaBox.dataset.cardid = counter;
+        } else if (counter === cards.length - 1) {
+            counter = 0;
+            DOMelements.qaBox.innerText = "Congrats! No cards to study right now!";
+            setTimeout(DOMelements.decksLink.click, 2000);
         } else {
             counter++;
             askQuestions();
