@@ -81,7 +81,6 @@ const uiControl = (function () {
                     DOMelements.loginContainer.classList.remove('login-container-inactive');
                     DOMelements.deckContainer.classList.add('decks-inactive');
                     DOMelements.quizContainer.classList.add('quiz-inactive');
-                    // DOMelements.logoutButton.classList.add('logout-button-inactive');
                     break;
 
                 case 'decks':
@@ -89,14 +88,12 @@ const uiControl = (function () {
                     DOMelements.loginContainer.classList.add('login-container-inactive');
                     DOMelements.deckContainer.classList.remove('decks-inactive');
                     DOMelements.quizContainer.classList.add('quiz-inactive');
-                    // DOMelements.logoutButton.classList.remove('logout-button-inactive');
                     break;
 
                 case 'quiz':
                     DOMelements.loginContainer.classList.add('login-container-inactive');
                     DOMelements.deckContainer.classList.add('decks-inactive');
                     DOMelements.quizContainer.classList.remove('quiz-inactive');
-                    // DOMelements.logoutButton.classList.remove('logout-button-inactive');
                     break;
 
                 default:
