@@ -69,18 +69,33 @@ li:hover {
 }
 
 #answer-buttons {
-  text-align: center;
-  padding: 10px;
-  margin-top: 15px;
+  display: flex;
+  flex-flow: column;
 }
 
 #answer-buttons>button {
-  margin: 0 10px;
+  margin: 5px 0;
 }
 
 #quiz-container {
   padding: 20px;
-  width: 600px;
+  width: 90%;
+}
+
+@media(min-width:767px) {
+  #answer-buttons {
+    text-align: center;
+    padding: 10px;
+    margin-top: 15px;
+    display: block;
+  }
+  #answer-buttons>button {
+    margin: 0 10px;
+  }
+  #quiz-container {
+    padding: 20px;
+    width: 600px;
+  }
 }
 
 #qabox {
